@@ -1,0 +1,10 @@
+    [Interface]
+    MTU = 1420
+    PrivateKey = {{ cli_guacamole_private_key }}
+    Address = 10.200.0.2/32
+    DNS = 8.8.8.8
+
+    [Peer]
+    PublicKey = {{ wireguard_clients_public_key }}
+    AllowedIPs = 10.200.0.0/24
+    Endpoint = 62.109.2.23:51840

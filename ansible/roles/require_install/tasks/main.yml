@@ -1,0 +1,7 @@
+- name: Install required packages
+  apt:
+    name:
+      - python3-apt    
+      - python3-pip
+    state: present
+    update_cache: yes

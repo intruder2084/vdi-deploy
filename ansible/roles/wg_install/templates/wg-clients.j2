@@ -1,0 +1,10 @@
+[Interface]
+MTU = 1420
+Address = 10.200.0.1/24
+ListenPort = 51840
+PrivateKey = {{ wireguard_clients_private_key }}
+
+#Guacamole
+[Peer]
+PublicKey = {{ cli_guacamole_publickey }}
+AllowedIPs = 10.200.0.2/32

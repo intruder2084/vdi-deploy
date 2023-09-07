@@ -1,0 +1,6 @@
+- name: Deploy OpenNebula FrontEnd
+  gather_facts: no
+  hosts: opennebula-frontend
+  roles: 
+    - require_install
+    - front_end_install

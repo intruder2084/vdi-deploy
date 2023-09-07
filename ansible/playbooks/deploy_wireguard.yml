@@ -1,0 +1,6 @@
+- name: Deploy WireGuard VPN server
+  gather_facts: no
+  hosts: wireguard-server
+  roles:
+    - require_install
+    - wg_install

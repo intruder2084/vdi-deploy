@@ -1,0 +1,2 @@
+GRANT ALL PRIVILEGES ON *.* TO 'guacamole_user'@'%' IDENTIFIED BY 'guacamole_password' WITH GRANT OPTION;
+FLUSH PRIVILEGES;

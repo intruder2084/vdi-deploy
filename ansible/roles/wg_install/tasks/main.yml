@@ -1,0 +1,110 @@
+- name: Install WireGuard
+  apt:
+    name: wireguard
+
+- name: Install libraries
+  pip:
+    name: mysql-connector-python
+
+- name: Generate WireGuard admins private key
+  shell: wg genkey
+  register: private_key_result_admins
+
+- name: Generate WireGuard admins public key
+  shell: echo "{{ private_key_result_admins.stdout }}" | wg pubkey
+  register: public_key_result_admins
+
+- name: Generate WireGuard clients private key
+  shell: wg genkey
+  register: private_key_result_clients
+
+- name: Generate WireGuard clients public key
+  shell: echo "{{ private_key_result_clients.stdout }}" | wg pubkey
+  register: public_key_result_clients
+
+- name: Generate WireGuard opennebula private key
+  shell: wg genkey
+  register: opennebula_private_key_result
+
+- name: Generate WireGuard opennebula public key
+  shell: echo "{{ opennebula_private_key_result.stdout }}" | wg pubkey
+  register: opennebula_publickey_result
+
+- name: Generate WireGuard admins Guacamole private key
+  shell: wg genkey
+  register: adm_guacamole_private_key_result
+
+- name: Generate WireGuard admins Guacamole public key
+  shell: echo "{{ adm_guacamole_private_key_result.stdout }}" | wg pubkey
+  register: adm_guacamole_publickey_result
+
+- name: Generate WireGuard clients Guacamole private key
+  shell: wg genkey
+  register: cli_guacamole_private_key_result
+
+- name: Generate WireGuard clients Guacamole public key
+  shell: echo "{{ cli_guacamole_private_key_result.stdout }}" | wg pubkey
+  register: cli_guacamole_publickey_result
+
+- name: Store the keys in Ansible facts
+  set_fact:
+    wireguard_admins_private_key: "{{ private_key_result_admins.stdout }}"
+    wireguard_admins_public_key: "{{ public_key_result_admins.stdout }}"
+    wireguard_clients_private_key: "{{ private_key_result_clients.stdout }}"
+    wireguard_clients_public_key: "{{ public_key_result_clients.stdout }}"
+    opennebula_private_key: "{{ opennebula_private_key_result.stdout }}"
+    opennebula_publickey: "{{ opennebula_publickey_result.stdout }}"
+    adm_guacamole_private_key: "{{ adm_guacamole_private_key_result.stdout }}"
+    adm_guacamole_publickey: "{{ adm_guacamole_publickey_result.stdout }}"
+    cli_guacamole_private_key: "{{ cli_guacamole_private_key_result.stdout }}"
+    cli_guacamole_publickey: "{{ cli_guacamole_publickey_result.stdout }}"
+
+- name: Create WireGuard admins configuration file
+  template:
+    src: wg-admins.j2
+    dest: /etc/wireguard/wg-admins.conf
+    owner: root
+    group: root
+
+- name: Create WireGuard clients configuration file
+  template:
+    src: wg-clients.j2
+    dest: /etc/wireguard/wg-clients.conf
+    owner: root
+    group: root
+
+- name: Create WireGuard opennebula configuration file
+  template:
+    src: wg-one.j2
+    dest: /root/wg-one.conf
+    owner: root
+    group: root
+
+- name: Create WireGuard Guacamole admins configuration file
+  template:
+    src: wg-adm-guac.j2
+    dest: /root/wg-adm-guac.conf
+    owner: root
+    group: root
+
+- name: Create WireGuard Guacamole clients configuration file
+  template:
+    src: wg-cli-guac.j2
+    dest: /root/wg-cli-guac.conf
+    owner: root
+    group: root
+
+- name: Create script
+  template:
+    src: wgreq.j2
+    dest: /root/wgreq.py
+    owner: root
+    group: root
+
+- name: Start admins configuration
+  shell:
+    cmd: wg-quick up wg-admins
+
+- name: Start clients configuration
+  shell:
+    cmd:  wg-quick up wg-clients

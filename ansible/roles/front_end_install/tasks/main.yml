@@ -1,0 +1,104 @@
+- name: Add OpenNebula repository key
+  apt_key:
+    url:  https://downloads.opennebula.io/repo/repo2.key
+    state: present
+
+- name: Add OpenNebula repository
+  apt_repository:
+    repo: deb https://downloads.opennebula.io/repo/6.6.0/Ubuntu/22.04 stable opennebula
+    state: present
+
+- name: Update
+  apt:
+    update_cache: yes
+
+- name: Install OpenNebula packages
+  apt:
+    name: ['opennebula', 'opennebula-sunstone', 'opennebula-fireedge', 'opennebula-gate', 'opennebula-flow', 'opennebula-provision', 'opennebula-node-kvm', 'bridge-utils', 'cpu-checker', 'libvirt-clients', 'libvirt-daemon', 'qemu', 'qemu-kvm', 'virtinst', 'libvirt-daemon-system', 'net-tools', 'resolvconf']
+    update_cache: yes
+
+- name: Enter the DNS server
+  lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver 77.88.8.8"
+
+- name: Add oneadmin password
+  copy:
+    content: "oneadmin:Toor301!"
+    dest: /var/lib/one/.one/one_auth
+    owner: oneadmin
+
+- name: Configure fireedge endpoint
+  lineinfile:
+    path: /etc/one/sunstone-server.conf
+    regexp: ":public_fireedge_endpoint: http://localhost:2616"
+    line: ":public_fireedge_endpoint: http://10.13.180.10:2616"
+
+- name: Copy Scheduler config
+  copy:
+    src: sched.conf
+    dest: /etc/one/
+    force: yes
+
+- name: Start and enable OpenNebula services
+  service:
+    name: "{{ item }}"
+    state: started
+  loop:
+    - opennebula
+    - opennebula-sunstone
+    - opennebula-fireedge
+    - opennebula-gate
+    - opennebula-flow
+
+- name: Restart Scheduler
+  systemd:
+    name: opennebula-scheduler
+    state: restarted
+
+- name: Configure libvirt
+  blockinfile:
+    path: /etc/libvirt/libvirtd.conf
+    block: |
+      unix_sock_group = "oneadmin"
+      unix_sock_rw_perms = "0777"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+
+- name: Restart libvirt
+  systemd:
+    name: libvirtd
+    state: restarted
+
+- name: Create known_hosts file
+  shell:
+    cmd: ssh-keyscan 10.13.180.10 10.13.180.10 >> /var/lib/one/.ssh/known_hosts
+  become_user: oneadmin
+
+- name: Create directory for images
+  file:
+    path: /images
+    state: directory
+    owner: oneadmin
+    group: oneadmin
+
+- name: Download image
+  get_url:
+    url: https://dl.astralinux.ru/artifactory/mg-generic/orel/brest/orel-vanilla-gui-2.12.46-brest-mg11.1.0.qcow2
+    dest: /images/
+
+- name: Copy datastore config
+  copy:
+    src: datastore.conf
+    dest: /tmp/
+    owner: oneadmin
+    group: oneadmin
+
+- name: Edit datastore settings
+  shell:
+    cmd: onedatastore update default /tmp/datastore.conf
+  become_user: oneadmin
+
+- name: Create image
+  shell:
+    cmd: oneimage create --name Astra --path /images/orel-vanilla-gui-2.12.46-brest-mg11.1.0.qcow2 -d 1
+  become_user: oneadmin

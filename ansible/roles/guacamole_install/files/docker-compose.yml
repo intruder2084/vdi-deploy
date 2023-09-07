@@ -1,0 +1,56 @@
+version: '3.3'
+services:
+  guacd:
+    image: guacamole/guacd
+    restart: always
+    networks:
+      - guacd_net
+
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: guacamole_db
+      MYSQL_USER: guacamole_user
+      MYSQL_PASSWORD: guacamole_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./prepare_db.sql:/docker-entrypoint-initdb.d/prepare_db.sql
+      - ./001-create-schema.sql:/docker-entrypoint-initdb.d/001-create-schema.sql
+      - ./002-create-admin-user.sql:/docker-entrypoint-initdb.d/002-create-admin-user.sql
+      - ./remoteconn.sql:/docker-entrypoint-initdb.d/remoteconn.sql
+    ports:
+      - 3306:3306
+    networks:
+      - guacd_net
+
+  guacamole:
+    image: guacamole/guacamole
+    restart: always
+    depends_on:
+      - guacd
+      - mysql
+    links:
+      - guacd
+      - mysql
+    environment:
+      GUACD_HOSTNAME: guacd
+      MYSQL_HOSTNAME: mysql
+      MYSQL_DATABASE: guacamole_db
+      MYSQL_USER: guacamole_user
+      MYSQL_PASSWORD: guacamole_password
+    volumes:
+      - guacamole_data:/config
+    ports:
+      - 8080:8080
+    networks:
+      - guacd_net
+
+volumes:
+  mysql_data:
+  guacamole_data:
+
+networks:
+  guacd_net:
+    driver: bridge

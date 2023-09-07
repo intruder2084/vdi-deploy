@@ -1,0 +1,7 @@
+- name: Deploy Guacamole
+  hosts: guacamole-prod
+  gather_facts: no
+  roles:
+    - require_install
+    - docker_install
+    - guacamole_install

@@ -1,0 +1,15 @@
+[Interface]
+MTU = 1420
+Address = 10.100.0.1/24
+ListenPort = 51820
+PrivateKey = {{ wireguard_admins_private_key }}
+
+#OpenNebula
+[Peer]
+PublicKey = {{ opennebula_publickey }}
+AllowedIPs = 10.100.0.2/32, 10.13.0.0/16
+
+#Guacamole
+[Peer]
+PublicKey = {{ adm_guacamole_publickey }}
+AllowedIPs = 10.100.0.3/32

@@ -1,0 +1,11 @@
+[guacamole]
+guacamole ansible_host=10.13.180.100 ansible_user=root ansible_private_key_file=/home/intruder/.ssh/id_rsa ansible_python_interpreter=/usr/bin/python3
+
+[guacamole-prod]
+guacamole-prod-server ansible_host=37.230.115.101 ansible_user=root ansible_private_key_file=/home/intruder/.ssh/id_rsa ansible_python_interpreter=/usr/bin/python3
+
+[opennebula-frontend]
+oneb-front ansible_host=10.13.180.10 ansible_user=root ansible_private_key_file=/home/intruder/.ssh/id_rsa ansible_python_interpreter=/usr/bin/python3
+
+[wireguard-server]
+wireguard-server ansible_host=62.109.2.23 ansible_user=root ansible_private_key_file=/home/intruder/.ssh/id_rsa ansible_python_interpreter=/usr/bin/python3

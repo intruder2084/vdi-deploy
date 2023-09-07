@@ -1,0 +1,15 @@
+- name: Copy files
+  copy:
+    src: "{{ item }}"
+    dest: /tmp/
+  with_items:
+    - docker-compose.yml
+    - prepare_db.sql
+    - 001-create-schema.sql
+    - 002-create-admin-user.sql
+    - remoteconn.sql
+
+- name: Build and deploy containers
+  docker_compose:
+    project_src: /tmp/
+    state: present
